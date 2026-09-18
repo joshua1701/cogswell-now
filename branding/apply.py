@@ -188,6 +188,32 @@ def main():
           rustc +"$TC" --version --verbose
 """)
 
+    # ── Windows: Metadaten (Explorer „Details“, UAC-Dialog, Taskleiste) ──
+    COPY = 'Copyright © 2026 Cogswell IT · auf Basis von RustDesk (AGPL-3.0)'
+    for toml in ('Cargo.toml', 'libs/portable/Cargo.toml'):
+        patch(toml, 'LegalCopyright = "Copyright © 2026 Purslane Tech Pte. Ltd. All rights reserved."', f'LegalCopyright = "{COPY}"')
+        patch(toml, 'ProductName = "RustDesk"', f'ProductName = "{DISPLAY_NAME}"')
+        patch(toml, 'FileDescription = "RustDesk Remote Desktop"', f'FileDescription = "{DISPLAY_NAME} Fernwartung"')
+        patch(toml, 'description = "RustDesk Remote Desktop"', f'description = "{DISPLAY_NAME} Fernwartung"')
+    patch('libs/portable/Cargo.toml', 'OriginalFilename = "rustdesk.exe"', f'OriginalFilename = "{APP_NAME}.exe"')
+
+    # ── Windows: Programmdatei heißt wie die App (Dienst, Autostart, MSI) ──
+    # Wie der Client-Generator von RustDesk: nach dem Flutter-Build
+    # rustdesk.exe → SupportMe.exe; Portable-Hülle und MSI starten diese.
+    patch('.github/workflows/flutter-build.yml',
+          '          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe\n',
+          f'          mv ../../rustdesk/rustdesk.exe ../../rustdesk/{APP_NAME}.exe\n'
+          f'          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/{APP_NAME}.exe\n')
+    patch('.github/workflows/flutter-build.yml',
+          '          python preprocess.py --arp -d ../../rustdesk\n',
+          f'          python preprocess.py --arp -d ../../rustdesk --app-name {APP_NAME} -m "Cogswell IT"\n')
+
+    # ── Android: interne Texte (Benachrichtigung, Bedienungshilfe) ──
+    patch('flutter/android/app/src/main/res/values/strings.xml',
+          '<string name="app_name">RustDesk</string>', f'<string name="app_name">{DISPLAY_NAME}</string>')
+    patch('flutter/android/app/src/main/res/values/strings.xml',
+          'when RustDesk screen sharing is established', f'when {DISPLAY_NAME} screen sharing is established')
+
     if fehler:
         print('Branding NICHT vollständig angewendet:')
         for f in fehler:
