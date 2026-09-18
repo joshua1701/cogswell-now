@@ -29,6 +29,10 @@ ACCENT_50 = '0x774D90AD'
 ACCENT_80 = '0xAA4D90AD'
 BUTTON = '0xFF276A87'      # --ca-accent-strong
 ID_COLOR = '0xFF00B8FF'    # Logo-Cyan
+API_SERVER = 'https://support-now.cogswell.net'
+WEBSITE = 'https://www.cogswell.de'
+DATENSCHUTZ = 'https://www.cogswell.de/datenschutz'
+DOWNLOAD = 'https://www.cogswell.de/cogswell-now'
 
 ROOT = os.getcwd()
 HIER = os.path.dirname(os.path.abspath(__file__))
@@ -38,8 +42,10 @@ fehler = []
 def patch(pfad, alt, neu, anzahl=1):
     voll = os.path.join(ROOT, pfad)
     s = open(voll, encoding='utf-8').read()
-    if neu in s and alt not in s:
-        return  # schon angewendet
+    # Schon angewendet? Nur am Ersatztext erkennen — er kann den Suchtext
+    # enthalten (Einfügung am Funktionsanfang), sonst würde doppelt gepatcht.
+    if neu in s:
+        return
     c = s.count(alt)
     if anzahl is None:          # alle Vorkommen, mindestens eines
         if c == 0:
@@ -133,6 +139,33 @@ def main():
     # ── Linux: Fenstertitel ──
     patch('flutter/linux/my_application.cc', 'gtk_header_bar_set_title(header_bar, "rustdesk");', f'gtk_header_bar_set_title(header_bar, "{DISPLAY_NAME}");')
     patch('flutter/linux/my_application.cc', 'gtk_window_set_title(window, "rustdesk");', f'gtk_window_set_title(window, "{DISPLAY_NAME}");')
+
+    # ── Konten-API: eigener Server (RustDesk Server Pro) statt admin.rustdesk.com ──
+    # Ohne gesetzte Option fiel der Client auf den RustDesk-Dienst zurück —
+    # Anmeldung, Adressbuch und Heartbeat wären dorthin gegangen.
+    patch('src/common.rs', '    "https://admin.rustdesk.com".to_owned()\n}',
+          f'    // Cogswell-Now!: eigene Konsole (HTTPS über nginx)\n    "{API_SERVER}".to_owned()\n}}')
+    # Keine Update-Prüfung gegen api.rustdesk.com — Updates kommen von uns.
+    patch('src/common.rs',
+          'pub async fn do_check_software_update() -> hbb_common::ResultType<()> {\n',
+          'pub async fn do_check_software_update() -> hbb_common::ResultType<()> {\n'
+          '    // Cogswell-Now!: keine Update-Hinweise auf RustDesk-Downloads\n'
+          '    if is_custom_client() {\n        return Ok(());\n    }\n')
+
+    # ── Links: cogswell.de statt rustdesk.com ──
+    for datei in ('flutter/lib/desktop/pages/desktop_setting_page.dart',
+                  'flutter/lib/desktop/pages/install_page.dart',
+                  'flutter/lib/mobile/pages/settings_page.dart'):
+        patch(datei, 'https://rustdesk.com/privacy.html', DATENSCHUTZ, anzahl=None)
+    for datei in ('flutter/lib/desktop/pages/desktop_home_page.dart',
+                  'flutter/lib/mobile/pages/connection_page.dart'):
+        patch(datei, 'https://rustdesk.com/download', DOWNLOAD, anzahl=None)
+    patch('flutter/lib/desktop/pages/desktop_setting_page.dart',
+          "launchUrlString('https://rustdesk.com');", f"launchUrlString('{WEBSITE}');")
+    # „Powered by RustDesk" auf der Startseite ausblenden
+    patch('flutter/lib/common.dart',
+          'if (bind.mainGetBuildinOption(key: "hide-powered-by-me") == \'Y\') {',
+          'if (true) { // Cogswell-Now!: kein „Powered by"-Hinweis')
 
     if fehler:
         print('Branding NICHT vollständig angewendet:')

@@ -3738,7 +3738,7 @@ Color? disabledTextColor(BuildContext context, bool enabled) {
 }
 
 Widget loadPowered(BuildContext context) {
-  if (bind.mainGetBuildinOption(key: "hide-powered-by-me") == 'Y') {
+  if (true) { // Cogswell-Now!: kein „Powered by"-Hinweis
     return SizedBox.shrink();
   }
   return MouseRegion(

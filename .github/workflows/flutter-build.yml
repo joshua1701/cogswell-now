@@ -420,8 +420,10 @@ jobs:
         run: |
           TC=nightly-2023-10-13-${{ matrix.job.target }} # must use nightly here, because of abi_thiscall feature required
           rustup toolchain install "$TC" --target ${{ matrix.job.target }} --component rustfmt --profile minimal --no-self-update --force-non-host
-          rustup default "$TC"
-          rustc --version --verbose
+          # `rustup default` prüft den Host erneut und bricht ab → Toolchain
+          # für alle folgenden Schritte per Umgebungsvariable festlegen.
+          echo "RUSTUP_TOOLCHAIN=$TC" >> "$GITHUB_ENV"
+          rustc +"$TC" --version --verbose
 
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
