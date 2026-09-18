@@ -952,7 +952,7 @@ pub fn check_software_update() {
 // Because the url is always `https://api.rustdesk.com/version/latest`.
 #[tokio::main(flavor = "current_thread")]
 pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
-    // Cogswell-Now!: keine Update-Hinweise auf RustDesk-Downloads
+    // Support.me: keine Update-Hinweise auf RustDesk-Downloads
     if is_custom_client() {
         return Ok(());
     }
@@ -1084,8 +1084,8 @@ fn get_api_server_(api: String, custom: String) -> String {
             return format!("http://{}", s);
         }
     }
-    // Cogswell-Now!: eigene Konsole (HTTPS über nginx)
-    "https://support-now.cogswell.net".to_owned()
+    // Support.me: eigene Konsole (HTTPS über nginx)
+    "https://support.cogswell.net".to_owned()
 }
 
 #[inline]

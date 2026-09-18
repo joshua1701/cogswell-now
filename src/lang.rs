@@ -227,8 +227,8 @@ pub fn translate_locale(name: String, locale: &str) -> String {
                 && !name.starts_with("upgrade_rustdesk_server_pro")
                 && name != "powered_by_me"
             {
-                // Cogswell-Now!: sichtbarer Name (technischer Name ohne „!")
-                let app_name = "Cogswell-Now!".to_owned();
+                // Support.me: sichtbarer Name (technischer Name ohne „!")
+                let app_name = "Support.me".to_owned();
                 if !app_name.contains("RustDesk") {
                     s = s.replace("RustDesk", &app_name);
                 } else {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Macht aus einem RustDesk-Checkout den Client „Cogswell-Now!".
+"""Macht aus einem RustDesk-Checkout den Client „Support.me" (Cogswell IT).
 
 Aufruf im Repo-Wurzelverzeichnis:  python3 branding/apply.py
 Idempotent: bereits angewendete Änderungen werden erkannt und übersprungen.
@@ -8,20 +8,20 @@ RustDesk bei einem Update eine Stelle, bricht das Skript mit einer klaren
 Meldung ab, statt still ein halb gebrandetes Programm zu bauen.
 
 Getrennt gehalten:
-  APP_NAME      „Cogswell-Now"  — technischer Name (Pfade, Dienst, Drucker,
+  APP_NAME      „SupportMe"     — technischer Name (Pfade, Dienst, Drucker,
                                   URL-Schema). RustDesk erlaubt hier nur
                                   Buchstaben, Ziffern und Bindestrich.
-  DISPLAY_NAME  „Cogswell-Now!" — sichtbarer Name in Texten und Titeln.
+  DISPLAY_NAME  „Support.me"    — sichtbarer Name in Texten und Titeln.
 """
 import os
 import shutil
 import sys
 
-APP_NAME = 'Cogswell-Now'
-DISPLAY_NAME = 'Cogswell-Now!'
-SERVER = 'support-now.cogswell.net'
+APP_NAME = 'SupportMe'
+DISPLAY_NAME = 'Support.me'
+SERVER = 'support.cogswell.net'
 KEY = 'RT6pspgIeIhmHjfwE5PWFsIYUiBtryaQDacHULX1Ke8='
-BUNDLE_ID = 'de.cogswell.now'
+BUNDLE_ID = 'de.cogswell.supportme'
 ORG = 'de.cogswell'
 # Farben von cogswell.de
 ACCENT = '0xFF4D90AD'      # --ca-accent
@@ -29,10 +29,10 @@ ACCENT_50 = '0x774D90AD'
 ACCENT_80 = '0xAA4D90AD'
 BUTTON = '0xFF276A87'      # --ca-accent-strong
 ID_COLOR = '0xFF00B8FF'    # Logo-Cyan
-API_SERVER = 'https://support-now.cogswell.net'
+API_SERVER = 'https://support.cogswell.net'
 WEBSITE = 'https://www.cogswell.de'
 DATENSCHUTZ = 'https://www.cogswell.de/datenschutz'
-DOWNLOAD = 'https://www.cogswell.de/cogswell-now'
+DOWNLOAD = 'https://www.cogswell.de/support-me'
 
 ROOT = os.getcwd()
 HIER = os.path.dirname(os.path.abspath(__file__))
@@ -86,14 +86,14 @@ def main():
     # ── Sichtbarer Name in allen übersetzten Texten ──
     patch('src/lang.rs',
           '                let app_name = crate::get_app_name();\n                if !app_name.contains("RustDesk") {',
-          f'                // Cogswell-Now!: sichtbarer Name (technischer Name ohne „!")\n'
+          f'                // Support.me: sichtbarer Name (technischer Name ohne „!")\n'
           f'                let app_name = "{DISPLAY_NAME}".to_owned();\n                if !app_name.contains("RustDesk") {{')
 
     # ── Fenstertitel (Flutter) ──
     patch('flutter/lib/common.dart',
           'String getWindowName({WindowType? overrideType}) {\n  final name = bind.mainGetAppNameSync();',
           "String getWindowName({WindowType? overrideType}) {\n"
-          f"  // Cogswell-Now!: sichtbarer Name im Fenstertitel\n  const name = '{DISPLAY_NAME}';")
+          f"  // Support.me: sichtbarer Name im Fenstertitel\n  const name = '{DISPLAY_NAME}';")
 
     # ── Farben: cogswell.de statt RustDesk-Blau ──
     patch('flutter/lib/common.dart', 'static const Color accent = Color(0xFF0071FF);', f'static const Color accent = Color({ACCENT});')
@@ -144,12 +144,12 @@ def main():
     # Ohne gesetzte Option fiel der Client auf den RustDesk-Dienst zurück —
     # Anmeldung, Adressbuch und Heartbeat wären dorthin gegangen.
     patch('src/common.rs', '    "https://admin.rustdesk.com".to_owned()\n}',
-          f'    // Cogswell-Now!: eigene Konsole (HTTPS über nginx)\n    "{API_SERVER}".to_owned()\n}}')
+          f'    // Support.me: eigene Konsole (HTTPS über nginx)\n    "{API_SERVER}".to_owned()\n}}')
     # Keine Update-Prüfung gegen api.rustdesk.com — Updates kommen von uns.
     patch('src/common.rs',
           'pub async fn do_check_software_update() -> hbb_common::ResultType<()> {\n',
           'pub async fn do_check_software_update() -> hbb_common::ResultType<()> {\n'
-          '    // Cogswell-Now!: keine Update-Hinweise auf RustDesk-Downloads\n'
+          '    // Support.me: keine Update-Hinweise auf RustDesk-Downloads\n'
           '    if is_custom_client() {\n        return Ok(());\n    }\n')
 
     # ── Links: cogswell.de statt rustdesk.com ──
@@ -165,7 +165,28 @@ def main():
     # „Powered by RustDesk" auf der Startseite ausblenden
     patch('flutter/lib/common.dart',
           'if (bind.mainGetBuildinOption(key: "hide-powered-by-me") == \'Y\') {',
-          'if (true) { // Cogswell-Now!: kein „Powered by"-Hinweis')
+          'if (true) { // Support.me: kein „Powered by"-Hinweis')
+
+    # ── CI: 32-Bit-Windows (Sciter) ──
+    # Neueres rustup verweigert die i686-Toolchain auf dem 64-Bit-Runner ohne
+    # --force-non-host; dtolnay/rust-toolchain kann das Flag nicht setzen,
+    # und `rustup default` prüft den Host erneut → RUSTUP_TOOLCHAIN setzen.
+    patch('.github/workflows/flutter-build.yml',
+          """      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: nightly-2023-10-13-${{ matrix.job.target }} # must use nightly here, because of abi_thiscall feature required
+          targets: ${{ matrix.job.target }}
+          components: "rustfmt"
+""",
+          """      - name: Install Rust toolchain
+        shell: bash
+        run: |
+          TC=nightly-2023-10-13-${{ matrix.job.target }} # must use nightly here, because of abi_thiscall feature required
+          rustup toolchain install "$TC" --target ${{ matrix.job.target }} --component rustfmt --profile minimal --no-self-update --force-non-host
+          echo "RUSTUP_TOOLCHAIN=$TC" >> "$GITHUB_ENV"
+          rustc +"$TC" --version --verbose
+""")
 
     if fehler:
         print('Branding NICHT vollständig angewendet:')

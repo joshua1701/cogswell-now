@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt alle Icons und Logos für Cogswell-Now! aus dem Cogswell-Logo.
+"""Erzeugt alle Icons und Logos für Support.me aus dem Cogswell-Logo.
 
 Aufruf:  python3 branding/make_assets.py [pfad/zum/logo.png] [schriftdatei]
 Ergebnis: branding/assets/<zielpfad im Repo> — apply.py kopiert von dort.
@@ -19,7 +19,7 @@ LOGO = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HIER, 'source', 'cogsw
 FONT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HIER, 'source', 'wordmark-font.ttf')
 OUT = os.path.join(HIER, 'assets')
 
-NAME = 'Cogswell-Now!'
+NAME = 'Support.me'
 INK = (25, 28, 31, 255)          # #191c1f — cogswell.de
 TILE = (255, 255, 255, 255)      # heller App-Icon-Grund wie cogswell.de
 

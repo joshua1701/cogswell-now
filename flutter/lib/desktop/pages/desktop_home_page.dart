@@ -437,7 +437,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://www.cogswell.de/cogswell-now');
+        final Uri url = Uri.parse('https://www.cogswell.de/support-me');
         await launchUrl(url);
       };
       if (isToUpdate) {

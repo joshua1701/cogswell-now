@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Cogswell-Now!
+Name=Support.me
 GenericName=Remote Desktop
 Comment=Cogswell Fernwartung
 Exec=rustdesk %u

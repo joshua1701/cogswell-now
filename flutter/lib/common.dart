@@ -3036,8 +3036,8 @@ int versionCmp(String v1, String v2) {
 }
 
 String getWindowName({WindowType? overrideType}) {
-  // Cogswell-Now!: sichtbarer Name im Fenstertitel
-  const name = 'Cogswell-Now!';
+  // Support.me: sichtbarer Name im Fenstertitel
+  const name = 'Support.me';
   switch (overrideType ?? kWindowType) {
     case WindowType.Main:
       return name;
@@ -3738,7 +3738,7 @@ Color? disabledTextColor(BuildContext context, bool enabled) {
 }
 
 Widget loadPowered(BuildContext context) {
-  if (true) { // Cogswell-Now!: kein „Powered by"-Hinweis
+  if (true) { // Support.me: kein „Powered by"-Hinweis
     return SizedBox.shrink();
   }
   return MouseRegion(
