@@ -1,0 +1,15 @@
+# Cogswell-Now! — Release-Build aller Plattformen.
+# Manuell starten (Actions → „Cogswell-Now! Release" → Run workflow).
+# Ergebnis: GitHub-Release mit dem Tag aus „upload-tag" in diesem Repo.
+name: Cogswell-Now! Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/flutter-build.yml
+    secrets: inherit
+    with:
+      upload-artifact: true
+      upload-tag: "cogswell-1.4.9"

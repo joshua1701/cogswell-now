@@ -1,9 +1,7 @@
 name: Flutter Nightly Build
 
 on:
-  schedule:
-    # schedule build every night
-    - cron: "0 0 * * *"
+  # Cogswell-Now!: kein nächtlicher Build im Fork
   workflow_dispatch:
 
 jobs:

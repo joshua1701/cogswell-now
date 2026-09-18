@@ -41,7 +41,11 @@ def patch(pfad, alt, neu, anzahl=1):
     if neu in s and alt not in s:
         return  # schon angewendet
     c = s.count(alt)
-    if c != anzahl:
+    if anzahl is None:          # alle Vorkommen, mindestens eines
+        if c == 0:
+            fehler.append(f'{pfad}: »{alt[:70]}« nicht gefunden')
+            return
+    elif c != anzahl:
         fehler.append(f'{pfad}: erwartet {anzahl}× »{alt[:70]}«, gefunden {c}×')
         return
     open(voll, 'w', encoding='utf-8').write(s.replace(alt, neu))
@@ -104,6 +108,20 @@ def main():
     patch('flutter/macos/Runner/Configs/AppInfo.xcconfig', 'PRODUCT_BUNDLE_IDENTIFIER = com.carriez.flutterHbb', f'PRODUCT_BUNDLE_IDENTIFIER = {BUNDLE_ID}')
     patch('flutter/macos/Runner/Info.plist', '<string>com.carriez.rustdesk</string>', f'<string>{BUNDLE_ID}</string>')
     patch('flutter/macos/Runner/Info.plist', '<string>rustdesk</string>', f'<string>{APP_NAME.lower()}</string>')
+
+    # macOS: Bundle heißt jetzt wie APP_NAME — Build-Skript und Workflow
+    # hatten „RustDesk.app" fest verdrahtet (u. a. Kopieren des Dienstes).
+    patch('build.py', "./build/macos/Build/Products/Release/RustDesk.app/Contents/MacOS/')",
+          f"./build/macos/Build/Products/Release/{APP_NAME}.app/Contents/MacOS/')")
+    patch('build.py', '--volname \\"RustDesk Installer\\"', f'--volname \\"{DISPLAY_NAME} Installer\\"')
+    patch('build.py', '--icon RustDesk.app 200 190 --hide-extension RustDesk.app rustdesk.dmg ./build/macos/Build/Products/Release/RustDesk.app',
+          f'--icon {APP_NAME}.app 200 190 --hide-extension {APP_NAME}.app rustdesk.dmg ./build/macos/Build/Products/Release/{APP_NAME}.app')
+    patch('.github/workflows/flutter-build.yml', 'RustDesk.app', f'{APP_NAME}.app', anzahl=None)
+
+    # ── Linux: Menüeintrag ──
+    patch('res/rustdesk.desktop', 'Name=RustDesk\n', f'Name={DISPLAY_NAME}\n')
+    patch('res/rustdesk.desktop', 'Comment=Remote Desktop\n', 'Comment=Cogswell Fernwartung\n')
+    patch('res/rustdesk-link.desktop', 'Name=RustDesk\n', f'Name={DISPLAY_NAME}\n')
 
     # ── Android ──
     man = 'flutter/android/app/src/main/AndroidManifest.xml'

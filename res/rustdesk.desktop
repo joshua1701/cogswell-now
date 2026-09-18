@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=RustDesk
+Name=Cogswell-Now!
 GenericName=Remote Desktop
-Comment=Remote Desktop
+Comment=Cogswell Fernwartung
 Exec=rustdesk %u
 Icon=rustdesk
 Terminal=false
