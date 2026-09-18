@@ -6,6 +6,12 @@ name: Cogswell-Now! Release
 on:
   workflow_dispatch:
 
+# Standard-Token im Fork ist nur lesend → ohne das hier scheitert jeder
+# „Publish"-Schritt mit HTTP 403 (Release anlegen, Dateien hochladen).
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     uses: ./.github/workflows/flutter-build.yml
