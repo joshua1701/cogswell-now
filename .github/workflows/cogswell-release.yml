@@ -1,7 +1,7 @@
-# Cogswell-Now! — Release-Build aller Plattformen.
-# Manuell starten (Actions → „Cogswell-Now! Release" → Run workflow).
+# Support.me — Release-Build aller Plattformen.
+# Manuell starten (Actions → „Support.me Release" → Run workflow).
 # Ergebnis: GitHub-Release mit dem Tag aus „upload-tag" in diesem Repo.
-name: Cogswell-Now! Release
+name: Support.me Release
 
 on:
   workflow_dispatch:
@@ -18,4 +18,4 @@ jobs:
     secrets: inherit
     with:
       upload-artifact: true
-      upload-tag: "cogswell-1.4.9"
+      upload-tag: "supportme-1.4.9"
