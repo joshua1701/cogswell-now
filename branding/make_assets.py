@@ -15,13 +15,15 @@ import tempfile
 from PIL import Image, ImageDraw, ImageFont
 
 HIER = os.path.dirname(os.path.abspath(__file__))
-LOGO = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HIER, 'source', 'cogswell-mark.png')
+LOGO = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HIER, 'source', 'supportme-mark.png')
 FONT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HIER, 'source', 'wordmark-font.ttf')
 OUT = os.path.join(HIER, 'assets')
 
 NAME = 'Support.me'
 INK = (25, 28, 31, 255)          # #191c1f — cogswell.de
-TILE = (255, 255, 255, 255)      # heller App-Icon-Grund wie cogswell.de
+TILE = (43, 100, 121, 255)       # Petrol #2B6479 — Support.me-App-Icon
+PETROL = TILE
+WEISS = (255, 255, 255, 255)
 
 
 def ziel(pfad):
@@ -73,7 +75,7 @@ def kachel(groesse, m, rand=0.0, radius=0.225, form='rund'):
     grund = Image.new('RGBA', (innen, innen), TILE)
     grund.putalpha(maske)
     bild.paste(grund, (off, off), grund)
-    logo = mark_auf(None, innen, 0.62, m)
+    logo = mark_auf(None, innen, 0.70, m, farbe=WEISS)   # weiße Marke auf Petrol
     bild.paste(logo, (off, off), logo)
     return bild
 
@@ -97,7 +99,7 @@ def wortmarke(m, text_farbe, hoehe=120, breite=600):
 def main():
     if os.path.isdir(OUT):
         shutil.rmtree(OUT)
-    m = mark()
+    m = silhouette(mark(), PETROL)   # Quelle ist weiß; frei stehend in Petrol
 
     # ── Allgemeine App-Icons (res/) ──
     kachel(1024, m).save(ziel('res/icon.png'))
@@ -127,7 +129,7 @@ def main():
     # ── Flutter-Assets: Icon + Logo im Kopf der App ──
     mark_auf(None, 512, 1.0, m).save(ziel('flutter/assets/icon.png'))
     wortmarke(m, INK).save(ziel('flutter/assets/logo_light.png'))
-    wortmarke(m, (255, 255, 255, 255)).save(ziel('flutter/assets/logo_dark.png'))
+    wortmarke(silhouette(m, WEISS), WEISS).save(ziel('flutter/assets/logo_dark.png'))
     wortmarke(m, INK).save(ziel('flutter/assets/logo.png'))
 
     # ── Android ──
@@ -137,7 +139,7 @@ def main():
         kachel(int(48 * f), m, radius=0.2).save(ziel(f'{basis}/ic_launcher.png'))
         kachel(int(48 * f), m, form='kreis').save(ziel(f'{basis}/ic_launcher_round.png'))
         # Adaptive Icon: 108 dp, sichtbare Zone 66 dp → Logo ca. 46 %
-        mark_auf(None, int(108 * f), 0.46, m).save(ziel(f'{basis}/ic_launcher_foreground.png'))
+        mark_auf(None, int(108 * f), 0.50, m, farbe=WEISS).save(ziel(f'{basis}/ic_launcher_foreground.png'))
         # Benachrichtigungs-Icon: weiße Silhouette
         mark_auf(None, int(24 * f), 0.92, m, farbe=(255, 255, 255, 255)).save(ziel(f'{basis}/ic_stat_logo.png'))
 
